@@ -1,4 +1,4 @@
-package shutdown.annotation;
+package shutdown;
 
 import org.springframework.context.annotation.Import;
 import shutdown.SharedConfigurationReference;

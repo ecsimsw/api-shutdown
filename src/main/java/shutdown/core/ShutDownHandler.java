@@ -3,6 +3,7 @@ package shutdown.core;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import shutdown.annotation.ShutDown;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
@@ -38,6 +38,10 @@ public class ShutDownHandler {
 
     @PostConstruct
     public void handle() {
+        registerShutDownApiByController();
+    }
+
+    private void registerShutDownApiByController() {
         var shutDownControllers = AutoConfigurationPackages.get(context).stream()
             .flatMap(it -> new Reflections(it).getTypesAnnotatedWith(ShutDown.class).stream())
             .filter(it -> !isAlreadyBean(it))
@@ -48,6 +52,15 @@ public class ShutDownHandler {
                 .filter(HandlerMappingInfo::isHandlerMappingMethod)
                 .map(HandlerMappingInfo::from)
                 .forEach(this::addHandler);
+        }
+    }
+
+    private void deleteControllerBean(Class<?> controllerClass) {
+        var registry = (BeanDefinitionRegistry) context;
+        for(var beanName : context.getBeanNamesForType(controllerClass)) {
+            if(context.getBean(beanName).getClass().isAnnotationPresent(ShutDown.class)) {
+                registry.removeBeanDefinition(beanName);
+            }
         }
     }
 
