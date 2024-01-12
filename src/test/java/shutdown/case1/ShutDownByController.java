@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shutdown.core.ShutDown;
 
-@ShutDown(conditionOnProfile = "dev")
+@ShutDown(conditionOnBean = ShutDownByController.class)
 @RestController
 public class ShutDownByController {
 

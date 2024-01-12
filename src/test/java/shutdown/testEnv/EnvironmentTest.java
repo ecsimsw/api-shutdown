@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 import shutdown.SharedConfigurationReference;
 import shutdown.case1.ShutDownByController;
 import shutdown.case2.ShutDownByHandlerController;
-import shutdown.core.ShutDownHandler;
+import shutdown.core.ShutDownFilterRegister;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +30,7 @@ public class EnvironmentTest {
             () -> applicationContext.getBean(SharedConfigurationReference.class)
         ).isInstanceOf(NoSuchBeanDefinitionException.class);
 
-        var beanInCorePackage = applicationContext.getBean(ShutDownHandler.class);
+        var beanInCorePackage = applicationContext.getBean(ShutDownFilterRegister.class);
         assertThat(beanInCorePackage).isNotNull();
     }
 

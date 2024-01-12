@@ -15,14 +15,8 @@ public @interface ShutDown {
     // Shut down when all beans not exist
     Class<?>[] conditionOnMissingBean() default {};
 
-    // Shut down when all profile exist
-    String[] conditionOnProfile() default "";
-
-    // Shut down when all profile not exist
-    String[] conditionMissingOnProfile() default "";
-
     // Response body message of shut down api
-    String[] message() default "The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.";
+    String message() default "The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.";
 
     // Response http status of shut down api
     HttpStatus status() default HttpStatus.SERVICE_UNAVAILABLE;

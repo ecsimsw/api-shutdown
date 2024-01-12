@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import shutdown.SharedConfigurationReference;
-import shutdown.core.ShutDownHandler;
+import shutdown.core.ShutDownFilterRegister;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,7 +25,7 @@ public class ShutDownByHandlerTest {
             () -> applicationContext.getBean(SharedConfigurationReference.class)
         ).isInstanceOf(NoSuchBeanDefinitionException.class);
 
-        var bean = applicationContext.getBean(ShutDownHandler.class);
+        var bean = applicationContext.getBean(ShutDownFilterRegister.class);
         assertThat(bean).isNotNull();
     }
 }
