@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import shutdown.SharedConfigurationReference;
-import shutdown.case1.ShutDownByController;
-import shutdown.case2.ShutDownByHandlerController;
+import shutdown.core.ShutDownByControllerTest;
+import shutdown.core.ShutDownByHandlerTest;
 import shutdown.core.ShutDownFilterRegister;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,14 +41,23 @@ public class EnvironmentTest {
     @Test
     public void checkTestCasePackageIsolated() {
         assertThatThrownBy(
-            () -> applicationContext.getBean(ShutDownByController.class)
+            () -> applicationContext.getBean(ShutDownByControllerTest.class)
         ).isInstanceOf(NoSuchBeanDefinitionException.class);
 
         assertThatThrownBy(
-            () -> applicationContext.getBean(ShutDownByHandlerController.class)
+            () -> applicationContext.getBean(ShutDownByHandlerTest.class)
         ).isInstanceOf(NoSuchBeanDefinitionException.class);
 
         var beanInTestEnvPackage = applicationContext.getBean(TestEnvController.class);
         assertThat(beanInTestEnvPackage).isNotNull();
+    }
+}
+
+@RestController
+class TestEnvController {
+
+    @GetMapping("/api/test")
+    public ResponseEntity<String> testApi() {
+        return ResponseEntity.ok("test");
     }
 }

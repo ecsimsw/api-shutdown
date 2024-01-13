@@ -1,4 +1,4 @@
-package shutdown.case2;
+package shutdown.core;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import shutdown.SharedConfigurationReference;
 import shutdown.core.ShutDownFilterRegister;
 
@@ -27,5 +30,14 @@ public class ShutDownByHandlerTest {
 
         var bean = applicationContext.getBean(ShutDownFilterRegister.class);
         assertThat(bean).isNotNull();
+    }
+}
+
+@RestController
+class ShutDownByHandlerController {
+
+    @GetMapping("/api/test")
+    public ResponseEntity<Void> testApi() {
+        return ResponseEntity.ok().build();
     }
 }

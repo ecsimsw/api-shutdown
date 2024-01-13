@@ -1,10 +1,11 @@
 package shutdown.core;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import java.lang.annotation.*;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface ShutDown {
@@ -20,4 +21,8 @@ public @interface ShutDown {
 
     // Response http status of shut down api
     HttpStatus status() default HttpStatus.SERVICE_UNAVAILABLE;
+
+    String mediaType() default MediaType.APPLICATION_JSON_VALUE;
+
+    boolean force() default false;
 }

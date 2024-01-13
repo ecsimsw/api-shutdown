@@ -2,7 +2,6 @@ package shutdown.core;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
-import shutdown.ShutDownException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
@@ -71,5 +70,9 @@ public class ShutDownMappingInfo {
 
     public boolean isMatch(HttpServletRequest request) {
         return isMatch(request.getRequestURI(), HttpMethod.valueOf(request.getMethod()));
+    }
+
+    public String[] getPaths() {
+        return paths;
     }
 }

@@ -1,4 +1,4 @@
-package shutdown;
+package shutdown.core;
 
 public class ShutDownException extends IllegalArgumentException {
 

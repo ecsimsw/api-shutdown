@@ -1,14 +1,11 @@
 package shutdown.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reflections.Reflections;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,17 +15,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
 
-    int filterOrder = 0;
-    String filterUrlPrefix = "/*";
-    String filterPrefix = "shutdownFilter-";
+    private final int filterOrder = 0;
+    private final String filterPrefix = "shutdownFilter-";
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -38,49 +31,32 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
 
         var filterPostfix = 1;
         for (var controller : shutDownControllers) {
-            if (!isShutDownCondition(controller)) {
-                continue;
+            var shutDownInfo = ShutDownInfo.of(controller);
+            if (shutDownInfo.isShutDown(beanFactory)) {
+                var shutDownFilter = shutDownFilter(shutDownInfo, controller);
+                beanFactory.registerSingleton(filterPrefix + filterPostfix++, shutDownFilter);
             }
-            beanFactory.registerSingleton(filterPrefix + filterPostfix++, shutDownFilter(controller));
         }
     }
 
-    private boolean isShutDownCondition(Class<?> controller) {
-        var shutDownInfo = controller.getAnnotation(ShutDown.class);
-        // TODO
-        return true;
-    }
-
-    private FilterRegistrationBean<Filter> shutDownFilter(Class<?> controller) {
-        var shutDownMappingInfos = Arrays.stream(controller.getMethods())
-            .filter(ShutDownMappingInfo::isHandlerMappingMethod)
-            .map(ShutDownMappingInfo::from)
-            .collect(Collectors.toList());
-        var shutDownInfo = controller.getAnnotation(ShutDown.class);
-        return shutDownFilter(
-            shutDownInfo.message(),
-            shutDownInfo.status(),
-            shutDownMappingInfos
-        );
-    }
-
-    private FilterRegistrationBean<Filter> shutDownFilter(String message, HttpStatus status, List<ShutDownMappingInfo> mappingInfos) {
+    private FilterRegistrationBean<Filter> shutDownFilter(ShutDownInfo shutDownInfo, Class<?> controller) {
+        var mappingInfos = ShutDownMappingInfos.of(controller);
         var shutDownFilterRegistrationBean = new FilterRegistrationBean<>();
         shutDownFilterRegistrationBean.setFilter(new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-                if (mappingInfos.stream().anyMatch(it -> it.isMatch(request))) {
-                    filterChain.doFilter(request, response);
+                if (mappingInfos.isMatch(request)) {
+                    response.setStatus(shutDownInfo.status().value());
+                    response.setContentType(shutDownInfo.mediaType().getType());
+                    response.getWriter().write(shutDownInfo.message());
                     return;
                 }
-                response.setStatus(status.value());
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getWriter(), Map.of("message", message));
+                filterChain.doFilter(request, response);
             }
         });
         shutDownFilterRegistrationBean.setEnabled(true);
         shutDownFilterRegistrationBean.setOrder(filterOrder);
-        shutDownFilterRegistrationBean.addUrlPatterns(filterUrlPrefix);
+        shutDownFilterRegistrationBean.addUrlPatterns(mappingInfos.paths());
         return shutDownFilterRegistrationBean;
     }
 }
