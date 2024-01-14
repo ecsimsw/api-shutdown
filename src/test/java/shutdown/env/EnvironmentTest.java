@@ -1,9 +1,10 @@
-package shutdown.testEnv;
+package shutdown.env;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shutdown.SharedConfigurationReference;
+import shutdown.ShutDownCorePackageContext;
 import shutdown.core.ShutDownByControllerTest;
 import shutdown.core.ShutDownFilterRegister;
 
@@ -18,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("테스트 환경을 확인한다.")
+@EnableAutoConfiguration
 @Import(TestEnvController.class)
-@SpringBootTest
+@SpringBootTest(classes = ShutDownCorePackageContext.class)
 public class EnvironmentTest {
 
     @Autowired

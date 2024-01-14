@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 public class ShutDownInfo {
 
+    private final int filterOrder;
+    private final String filterName;
     private final Class<?>[] conditionOnBean;
     private final Class<?>[] conditionOnMissingBean;
     private final boolean force;
@@ -15,7 +17,9 @@ public class ShutDownInfo {
     private final HttpStatus status;
     private final String produce;
 
-    public ShutDownInfo(Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String produce) {
+    public ShutDownInfo(int filterOrder, String filterName, Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String produce) {
+        this.filterOrder = filterOrder;
+        this.filterName = filterName;
         this.conditionOnBean = conditionOnBean;
         this.conditionOnMissingBean = conditionOnMissingBean;
         this.force = force;
@@ -24,9 +28,11 @@ public class ShutDownInfo {
         this.produce = produce;
     }
 
-    public static ShutDownInfo of(Class<?> controllerType) {
+    public static ShutDownInfo of(ShutDownGlobalConfig globalConfig, Class<?> controllerType) {
         var shutDownInfo = controllerType.getAnnotation(ShutDown.class);
         return new ShutDownInfo(
+            globalConfig.filterOrder(),
+            globalConfig.nextFilterName(),
             shutDownInfo.conditionOnBean(),
             shutDownInfo.conditionOnMissingBean(),
             shutDownInfo.force(),
@@ -40,19 +46,14 @@ public class ShutDownInfo {
         if (force) {
             return true;
         }
-
         if (conditionOnBean.length != 0 && conditionOnMissingBean.length != 0) {
             throw new ShutDownException("Only one of conditionOnBean and conditionOnMissingBean can be specified.");
         }
-
         if (conditionOnBean.length != 0) {
-            return Arrays.stream(conditionOnBean)
-                .allMatch(it -> hasBeanInFactory(beanFactory, it));
+            return Arrays.stream(conditionOnBean).allMatch(it -> hasBeanInFactory(beanFactory, it));
         }
-
         if (conditionOnMissingBean.length != 0) {
-            return Arrays.stream(conditionOnMissingBean)
-                .noneMatch(it -> hasBeanInFactory(beanFactory, it));
+            return Arrays.stream(conditionOnMissingBean).noneMatch(it -> hasBeanInFactory(beanFactory, it));
         }
         throw new ShutDownException("You must select either conditionOnBean or conditionOnMissingBean. Or set force to true");
     }
@@ -64,6 +65,14 @@ public class ShutDownInfo {
         } catch (BeansException e) {
             return false;
         }
+    }
+
+    public int filterOrder() {
+        return filterOrder;
+    }
+
+    public String filterName() {
+        return filterName;
     }
 
     public String message() {

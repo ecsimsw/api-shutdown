@@ -2,6 +2,7 @@ package shutdown.core;
 
 import org.reflections.Reflections;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -15,32 +16,40 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
 
-    private final int filterOrder = 0;
-    private final String filterPrefix = "shutdownFilter-";
-
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        var shutDownControllers = AutoConfigurationPackages.get(beanFactory).stream()
-            .flatMap(it -> new Reflections(it).getTypesAnnotatedWith(ShutDown.class).stream())
-            .collect(Collectors.toList());
-
-        var filterPostfix = 1;
-        for (var controller : shutDownControllers) {
-            var shutDownInfo = ShutDownInfo.of(controller);
-            if (shutDownInfo.isShutDown(beanFactory)) {
-                var shutDownFilter = shutDownFilter(shutDownInfo, controller);
-                beanFactory.registerSingleton(filterPrefix + filterPostfix++, shutDownFilter);
-            }
+        var globalConfig = getGlobalConfiguration(beanFactory);
+        for (var controller : shutDownControllerTypes(beanFactory)) {
+            var shutDownInfo = ShutDownInfo.of(globalConfig, controller);
+            var shutDownMappingInfos = ShutDownMappingInfos.of(controller);
+            var shutDownFilter = shutDownFilter(shutDownInfo, shutDownMappingInfos);
+            shutDownFilter.setOrder(shutDownInfo.filterOrder());
+            shutDownFilter.setEnabled(shutDownInfo.isShutDown(beanFactory));
+            beanFactory.registerSingleton(shutDownInfo.filterName(), shutDownFilter);
         }
     }
 
-    private FilterRegistrationBean<Filter> shutDownFilter(ShutDownInfo shutDownInfo, Class<?> controller) {
-        var mappingInfos = ShutDownMappingInfos.of(controller);
+    private ShutDownGlobalConfig getGlobalConfiguration(BeanFactory beanFactory) {
+        try {
+            return beanFactory.getBean(ShutDownGlobalConfig.class);
+        } catch (BeansException e) {
+            return ShutDownGlobalConfig.defaultValue();
+        }
+    }
+
+    private List<Class<?>> shutDownControllerTypes(ConfigurableListableBeanFactory beanFactory) {
+        return AutoConfigurationPackages.get(beanFactory).stream()
+            .flatMap(it -> new Reflections(it).getTypesAnnotatedWith(ShutDown.class).stream())
+            .collect(Collectors.toList());
+    }
+
+    private FilterRegistrationBean<Filter> shutDownFilter(ShutDownInfo shutDownInfo, ShutDownMappingInfos mappingInfos) {
         var shutDownFilterRegistrationBean = new FilterRegistrationBean<>();
         shutDownFilterRegistrationBean.setFilter(new OncePerRequestFilter() {
             @Override
@@ -54,8 +63,6 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
                 filterChain.doFilter(request, response);
             }
         });
-        shutDownFilterRegistrationBean.setEnabled(true);
-        shutDownFilterRegistrationBean.setOrder(filterOrder);
         shutDownFilterRegistrationBean.addUrlPatterns(mappingInfos.paths());
         return shutDownFilterRegistrationBean;
     }

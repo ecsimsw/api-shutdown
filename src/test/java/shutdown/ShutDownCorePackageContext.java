@@ -1,7 +1,9 @@
 package shutdown;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication(scanBasePackages = "shutdown.core")
+@Configuration
+@ComponentScan(value = {"shutdown.core"})
 public class ShutDownCorePackageContext {
 }
