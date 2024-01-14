@@ -3,7 +3,6 @@ package shutdown.core;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 
 import java.util.Arrays;
 
@@ -14,15 +13,15 @@ public class ShutDownInfo {
     private final boolean force;
     private final String message;
     private final HttpStatus status;
-    private final MediaType mediaType;
+    private final String produce;
 
-    public ShutDownInfo(Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, MediaType mediaType) {
+    public ShutDownInfo(Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String produce) {
         this.conditionOnBean = conditionOnBean;
         this.conditionOnMissingBean = conditionOnMissingBean;
         this.force = force;
         this.message = message;
         this.status = status;
-        this.mediaType = mediaType;
+        this.produce = produce;
     }
 
     public static ShutDownInfo of(Class<?> controllerType) {
@@ -33,7 +32,7 @@ public class ShutDownInfo {
             shutDownInfo.force(),
             shutDownInfo.message(),
             shutDownInfo.status(),
-            MediaType.valueOf(shutDownInfo.mediaType())
+            shutDownInfo.contentType()
         );
     }
 
@@ -75,7 +74,7 @@ public class ShutDownInfo {
         return status;
     }
 
-    public MediaType mediaType() {
-        return mediaType;
+    public String produce() {
+        return produce;
     }
 }

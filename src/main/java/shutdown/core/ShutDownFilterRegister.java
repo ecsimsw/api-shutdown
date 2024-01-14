@@ -47,7 +47,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
                 if (mappingInfos.isMatch(request)) {
                     response.setStatus(shutDownInfo.status().value());
-                    response.setContentType(shutDownInfo.mediaType().getType());
+                    response.setContentType(shutDownInfo.produce());
                     response.getWriter().write(shutDownInfo.message());
                     return;
                 }

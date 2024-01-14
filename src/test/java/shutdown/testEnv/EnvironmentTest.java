@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shutdown.SharedConfigurationReference;
 import shutdown.core.ShutDownByControllerTest;
-import shutdown.core.ShutDownByHandlerTest;
 import shutdown.core.ShutDownFilterRegister;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,10 +41,6 @@ public class EnvironmentTest {
     public void checkTestCasePackageIsolated() {
         assertThatThrownBy(
             () -> applicationContext.getBean(ShutDownByControllerTest.class)
-        ).isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        assertThatThrownBy(
-            () -> applicationContext.getBean(ShutDownByHandlerTest.class)
         ).isInstanceOf(NoSuchBeanDefinitionException.class);
 
         var beanInTestEnvPackage = applicationContext.getBean(TestEnvController.class);
