@@ -13,6 +13,9 @@ public @interface ShutDown {
     // Shut down when all the profiles are activated
     String[] conditionOnActiveProfile() default {};
 
+    // Shut down when all the properties exist
+    String[] conditionOnProperties() default {};
+
     // Shut down when all the beans exist
     Class<?>[] conditionOnBean() default {};
 

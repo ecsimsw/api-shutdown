@@ -3,7 +3,6 @@ package shutdown.core;
 import org.reflections.Reflections;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -24,7 +23,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         var globalConfig = getGlobalConfiguration(beanFactory);
         for (var controller : shutDownControllerTypes(beanFactory)) {
             var annotated = ShutDownAnnotated.of(controller);
-            if(annotated.isCondition(environment.getActiveProfiles(), beanFactory)) {
+            if(isShutDownCondition(annotated, beanFactory)) {
                 var handlerMappings = ShutDownHandlerMappings.of(controller);
                 var shutDownFilter = ShutDownFilter.of(globalConfig, annotated);
                 beanFactory.registerSingleton(
@@ -32,6 +31,23 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
                     shutDownFilter.toRegistrationBean(handlerMappings)
                 );
             }
+        }
+    }
+
+    private boolean isShutDownCondition(ShutDownAnnotated annotated, BeanFactory beanFactory) {
+        return annotated.conditions().isCondition(
+            profile -> List.of(environment.getActiveProfiles()).contains(profile),
+            property -> environment.containsProperty(property),
+            beanType -> hasBeanInFactory(beanFactory, beanType)
+        );
+    }
+
+    private boolean hasBeanInFactory(BeanFactory beanFactory, Class<?> beanType) {
+        try {
+            beanFactory.getBean(beanType);
+            return true;
+        } catch (BeansException e) {
+            return false;
         }
     }
 
