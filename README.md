@@ -232,3 +232,21 @@ class ShutDownController {
 - Headers
 - Consumes
 - Produces
+
+### 3. javax to jakarta, Spring boot 3.X.X 지원
+
+```
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+An attempt was made to call a method that does not exist. The attempt was made from the following location:
+
+    shutdown.core.ShutDownFilter.toRegistrationBean(ShutDownFilter.java:69)
+
+The following method did not exist:
+
+    'void org.springframework.boot.web.servlet.FilterRegistrationBean.setFilter(javax.servlet.Filter)'
+```
