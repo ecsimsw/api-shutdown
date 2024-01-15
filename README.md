@@ -1,10 +1,10 @@
 # utils-shutdown
 
-API는 정의되었지만 더이상 사용되지 않거나 임시로 막아둔 API 의 응답을 자동으로 생성한다.    
+API는 정의되었지만 더 이상 사용되지 않거나 임시로 막아둔 API 의 응답을 자동으로 생성한다.    
 
 ## 기능들 
 - 조건을 만족하면 정의된 핸들러의 HttpMethod 와 RequestPath 에 맞춰 ShutDown 응답을 반환한다.
-- 조건은 Profile 정보, Property 존재 유무, 빈 존재 유무로 정의한다.
+- 조건은 Profile 정보, Property 존재 여부, 빈 존재 여부로 정의한다.
 - 컨트롤러별 ShutDown 시 응답 메시지, 상태 코드, 컨텐츠 타입을 지정할 수 있다.
 - 전역 설정으로 기본 응답 형식들을 설정할 수 있다.
 
@@ -79,7 +79,7 @@ class ShutDownController {
 }
 ```
 
-핸들러는 `@GetMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping` 를 지원하고 아래처럼 여러 Url path, Http method 역시 처리 가능하다.     
+핸들러는 `@GetMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping` 를 지원하고 여러 UrlPath, HttpMethod 를 지정할 수 있다.    
 
 ``` java
 @RequestMapping(
@@ -98,7 +98,7 @@ public ResponseEntity<String> api1() {
 
 ### 1. Default 설정 변경 - Global configuration
 
-ShutDownGlobalConfig 빈을 등록하는 것으로 기본 값을 설정할 수 있다.
+ShutDownGlobalConfig 빈을 등록하는 것으로 기본값을 설정할 수 있다.
 @ShutDown 에 직접 값을 입력하는 경우 해당 값이 우선시 되고, 값을 입력하지 않는 경우 Global config 에 정의된 값으로 설정된다.         
 
 ``` java
