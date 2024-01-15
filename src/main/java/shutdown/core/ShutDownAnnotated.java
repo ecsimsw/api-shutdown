@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 public class ShutDownAnnotated {
 
+    private final String[] conditionOnProfiles;
     private final Class<?>[] conditionOnBean;
     private final Class<?>[] conditionOnMissingBean;
     private final boolean force;
@@ -15,10 +16,11 @@ public class ShutDownAnnotated {
     private final HttpStatus status;
     private final String contentType;
 
-    public ShutDownAnnotated(Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String contentType) {
-        if (conditionOnBean.length != 0 && conditionOnMissingBean.length != 0) {
-            throw new ShutDownException("Only one of conditionOnBean and conditionOnMissingBean can be specified.");
+    public ShutDownAnnotated(String[] conditionOnProfiles, Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String contentType) {
+        if (conditionOnProfiles.length != 0 && conditionOnBean.length != 0 && conditionOnMissingBean.length != 0) {
+            throw new ShutDownException("Only one of 'conditionOnXXX' can be specified.");
         }
+        this.conditionOnProfiles = conditionOnProfiles;
         this.conditionOnBean = conditionOnBean;
         this.conditionOnMissingBean = conditionOnMissingBean;
         this.force = force;
@@ -30,6 +32,7 @@ public class ShutDownAnnotated {
     public static ShutDownAnnotated of(Class<?> controllerType) {
         var shutDownInfo = controllerType.getAnnotation(ShutDown.class);
         return new ShutDownAnnotated(
+            shutDownInfo.conditionOnActiveProfile(),
             shutDownInfo.conditionOnBean(),
             shutDownInfo.conditionOnMissingBean(),
             shutDownInfo.force(),
@@ -39,12 +42,12 @@ public class ShutDownAnnotated {
         );
     }
 
-    public boolean isCondition(BeanFactory beanFactory) {
+    public boolean isCondition(String[] activeProfiles, BeanFactory beanFactory) {
         if (force) {
             return true;
         }
-        if (conditionOnBean.length != 0 && conditionOnMissingBean.length != 0) {
-            throw new ShutDownException("Only one of conditionOnBean and conditionOnMissingBean can be specified.");
+        if(conditionOnProfiles.length != 0) {
+            return Arrays.equals(conditionOnProfiles, activeProfiles);
         }
         if (conditionOnBean.length != 0) {
             return Arrays.stream(conditionOnBean).allMatch(it -> hasBeanInFactory(beanFactory, it));

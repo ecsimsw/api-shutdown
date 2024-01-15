@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import shutdown.core.filter.testEnv.NotRegisteredAsBean;
 
@@ -20,6 +21,7 @@ import static shutdown.core.filter.testEnv.TestApis.*;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @SpringBootTest(classes = ShutDownFilterPackageContext.class)
 public class ShutDownFilterTest {
 
@@ -32,7 +34,7 @@ public class ShutDownFilterTest {
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN))
             .andExpect(status().isAlreadyReported())
-            .andExpect(content().string("API_TO_BE_SHUTDOWN"));
+            .andExpect(content().string(SHUTDOWN_MESSAGE));
     }
 
     @DisplayName("여러 Mapping 정보를 포함한 핸들러를 처리할 수 있다.")
@@ -40,16 +42,16 @@ public class ShutDownFilterTest {
     public void testShutDownApiWithMultipleMappings() throws Exception {
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_1))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_2))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
         mockMvc
             .perform(post(API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_1))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
         mockMvc
             .perform(post(API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_2))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
     }
 
     @DisplayName("ShutDown 시 Controller Api 외 다른 Api 는 정상 작동한다.")
@@ -63,12 +65,20 @@ public class ShutDownFilterTest {
             .andExpect(status().isNotFound());
     }
 
+    @DisplayName("활동화된 Profile 을 ShutDown 의 조건으로 할 수 있다")
+    @Test
+    public void testShutDownApiByProfile() throws Exception {
+        mockMvc
+            .perform(get(API_TO_BE_SHUTDOWN_BY_PROFILE_CONDITION))
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
+    }
+
     @DisplayName("ConditionOnBean 으로 ShutDown 의 조건을 빈의 여부로 할 수 있다")
     @Test
-    public void testShutDownApiByConditionOnBean(@Autowired ApplicationContext context) throws Exception {
+    public void testShutDownApiByConditionOnBean() throws Exception {
         mockMvc
-            .perform(get(API_NOT_TO_BE_SHUTDOWN_BY_BEAN_EXISTS))
-            .andExpect(status().isOk());
+            .perform(get(API_TO_BE_SHUTDOWN_BY_BEAN_CONDITION))
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
     }
 
     @DisplayName("ConditionOnBean 의 모든 빈이 존재해야 ShutDown 된다.")
@@ -88,7 +98,7 @@ public class ShutDownFilterTest {
     public void testShutDownApiByConditionOnMissingBean() throws Exception {
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN_BY_MISSING_BEAN))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
     }
 
     @DisplayName("Force 옵션을 true 로 하면 Condition 과 관계없이 Shut down 된다.")
@@ -96,6 +106,6 @@ public class ShutDownFilterTest {
     public void testShutDownApiByForce() throws Exception {
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN_BY_FORCE))
-            .andExpect(status().isServiceUnavailable());
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
     }
 }

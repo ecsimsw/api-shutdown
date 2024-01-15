@@ -3,23 +3,28 @@ package shutdown.core;
 import org.reflections.Reflections;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
+public class ShutDownFilterRegister implements BeanFactoryPostProcessor, EnvironmentAware {
+
+    private Environment environment;
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         var globalConfig = getGlobalConfiguration(beanFactory);
         for (var controller : shutDownControllerTypes(beanFactory)) {
             var annotated = ShutDownAnnotated.of(controller);
-            if(annotated.isCondition(beanFactory)) {
+            if(annotated.isCondition(environment.getActiveProfiles(), beanFactory)) {
                 var handlerMappings = ShutDownHandlerMappings.of(controller);
                 var shutDownFilter = ShutDownFilter.of(globalConfig, annotated);
                 beanFactory.registerSingleton(
@@ -42,5 +47,10 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor {
         return AutoConfigurationPackages.get(beanFactory).stream()
             .flatMap(it -> new Reflections(it).getTypesAnnotatedWith(ShutDown.class).stream())
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

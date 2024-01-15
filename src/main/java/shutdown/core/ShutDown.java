@@ -10,21 +10,24 @@ import java.lang.annotation.*;
 @Inherited
 public @interface ShutDown {
 
-    // Shut down when all beans exist
+    // Shut down when all the profiles are activated
+    String[] conditionOnActiveProfile() default {};
+
+    // Shut down when all the beans exist
     Class<?>[] conditionOnBean() default {};
 
-    // Shut down when all beans not exist
+    // Shut down when all the beans not exist
     Class<?>[] conditionOnMissingBean() default {};
 
-    // Response body message of shut down api
+    // Response body message
     String message() default "The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.";
 
-    // Response http status of shut down api
+    // Response http status
     HttpStatus status() default HttpStatus.SERVICE_UNAVAILABLE;
 
     // Response content type
     String contentType() default MediaType.APPLICATION_JSON_VALUE;
 
-    // For shutdown, while ignoring other conditions
+    // Force shutdown ignoring other conditions
     boolean force() default false;
 }
