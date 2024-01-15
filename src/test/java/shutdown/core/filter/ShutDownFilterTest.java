@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import shutdown.core.filter.testEnv.NotRegisteredAsBean;
 
@@ -20,8 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static shutdown.core.filter.testEnv.TestApis.*;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@AutoConfigureMockMvc
+@TestPropertySource(properties = "test.property")
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
 @SpringBootTest(classes = ShutDownFilterPackageContext.class)
 public class ShutDownFilterTest {
 
@@ -70,6 +72,14 @@ public class ShutDownFilterTest {
     public void testShutDownApiByProfile() throws Exception {
         mockMvc
             .perform(get(API_TO_BE_SHUTDOWN_BY_PROFILE_CONDITION))
+            .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
+    }
+
+    @DisplayName("정의된 properties 을 ShutDown 의 조건으로 할 수 있다")
+    @Test
+    public void testShutDownApiByProperties() throws Exception {
+        mockMvc
+            .perform(get(API_TO_BE_SHUTDOWN_BY_PROPERTY_CONDITION))
             .andExpect(status().is(DEFAULT_SHUTDOWN_STATUS.value()));
     }
 

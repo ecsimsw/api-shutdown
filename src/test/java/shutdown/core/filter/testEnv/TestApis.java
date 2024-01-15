@@ -17,6 +17,7 @@ public class TestApis {
     public static final String API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_1 = "/API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_1";
     public static final String API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_2 = "/API_TO_BE_SHUTDOWN_MULTIPLE_MAPPINGS_2";
     public static final String API_TO_BE_SHUTDOWN_BY_PROFILE_CONDITION = "/API_TO_BE_SHUTDOWN_BY_PROFILE_CONDITION";
+    public static final String API_TO_BE_SHUTDOWN_BY_PROPERTY_CONDITION = "/API_TO_BE_SHUTDOWN_BY_PROPERTY_CONDITION";
     public static final String API_TO_BE_SHUTDOWN_BY_BEAN_CONDITION = "/API_TO_BE_SHUTDOWN_BY_BEAN_CONDITION";
     public static final String API_NOT_TO_BE_SHUTDOWN_BY_BEAN_EXISTS = "/API_NOT_TO_BE_SHUTDOWN_BY_BEAN_EXISTS";
     public static final String API_TO_BE_SHUTDOWN_BY_MISSING_BEAN = "/API_TO_BE_SHUTDOWN_BY_MISSING_BEAN";
@@ -73,6 +74,16 @@ class ShutDownConditionBeanController {
 class ShutDownConditionProfileController {
 
     @GetMapping(value = TestApis.API_TO_BE_SHUTDOWN_BY_PROFILE_CONDITION)
+    public ResponseEntity<String> api1() {
+        return ResponseEntity.ok(DEFAULT_NORMAL_MESSAGE);
+    }
+}
+
+@ShutDown(conditionOnProperties = "test.property")
+@RestController
+class ShutDownConditionPropertiesController {
+
+    @GetMapping(value = TestApis.API_TO_BE_SHUTDOWN_BY_PROPERTY_CONDITION)
     public ResponseEntity<String> api1() {
         return ResponseEntity.ok(DEFAULT_NORMAL_MESSAGE);
     }
