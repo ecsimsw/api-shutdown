@@ -22,20 +22,23 @@ latest version : 0.0.1
 @RestController
 class ShutDownController {
 
-    @GetMapping("/api/shutDownGet")
+    @GetMapping("/api/a")
     public ResponseEntity<String> hi() {
         return ResponseEntity.ok("Hi");
     }
 
-    @PostMapping("/api/shutDownPost")
+    @PostMapping("/api/b")
     public ResponseEntity<String> hey() {
         return ResponseEntity.ok("Hey");
     }
 }
 ```
-                         
+
+Active profile 이 backup 인 상황에서 GET::/api/a 또는 POST::/api/b 요청시 정의된 shutDown 상태를 응답한다.                      
 ```
-This API is currently unavailable.
+HTTP status : 503, SERVICE_UNAVAILABLE
+Content type : application/json
+Message : This API is currently unavailable.
 ```
 
 ## 사용 방법
@@ -57,7 +60,7 @@ dependencies {
 
 ### @EnableShutDown 추가
 
-@EnableShutDown 로 라이브러리 사용을 활성화한다. @SpringBootApplication 같은 애플리케이션 진입점 또는 @Configuration 파일에 적용한다.
+@EnableShutDown 로 라이브러리 사용을 활성화한다.     
 
 ``` java
 @EnableShutDown
@@ -116,6 +119,7 @@ ShutDownGlobalConfig 빈을 등록하는 것으로 기본값을 설정할 수 �
 @ShutDown 에 직접 값을 입력하는 경우 해당 값이 우선시 되고, 값을 입력하지 않는 경우 Global config 에 정의된 값으로 설정된다.         
 
 ``` java
+@EnableShutDown
 @Configuration
 public class ShutDownConfig {
 
