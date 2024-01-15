@@ -1,38 +1,35 @@
 package shutdown.core;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
 
-public class ShutDownInfo {
+public class ShutDownAnnotated {
 
-    private final int filterOrder;
-    private final String filterName;
     private final Class<?>[] conditionOnBean;
     private final Class<?>[] conditionOnMissingBean;
     private final boolean force;
     private final String message;
     private final HttpStatus status;
-    private final String produce;
+    private final String contentType;
 
-    public ShutDownInfo(int filterOrder, String filterName, Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String produce) {
-        this.filterOrder = filterOrder;
-        this.filterName = filterName;
+    public ShutDownAnnotated(Class<?>[] conditionOnBean, Class<?>[] conditionOnMissingBean, boolean force, String message, HttpStatus status, String contentType) {
+        if (conditionOnBean.length != 0 && conditionOnMissingBean.length != 0) {
+            throw new ShutDownException("Only one of conditionOnBean and conditionOnMissingBean can be specified.");
+        }
         this.conditionOnBean = conditionOnBean;
         this.conditionOnMissingBean = conditionOnMissingBean;
         this.force = force;
         this.message = message;
         this.status = status;
-        this.produce = produce;
+        this.contentType = contentType;
     }
 
-    public static ShutDownInfo of(ShutDownGlobalConfig globalConfig, Class<?> controllerType) {
+    public static ShutDownAnnotated of(Class<?> controllerType) {
         var shutDownInfo = controllerType.getAnnotation(ShutDown.class);
-        return new ShutDownInfo(
-            globalConfig.filterOrder(),
-            globalConfig.nextFilterName(),
+        return new ShutDownAnnotated(
             shutDownInfo.conditionOnBean(),
             shutDownInfo.conditionOnMissingBean(),
             shutDownInfo.force(),
@@ -42,7 +39,7 @@ public class ShutDownInfo {
         );
     }
 
-    public boolean isShutDown(ConfigurableListableBeanFactory beanFactory) {
+    public boolean isCondition(BeanFactory beanFactory) {
         if (force) {
             return true;
         }
@@ -58,21 +55,13 @@ public class ShutDownInfo {
         throw new ShutDownException("You must select either conditionOnBean or conditionOnMissingBean. Or set force to true");
     }
 
-    private boolean hasBeanInFactory(ConfigurableListableBeanFactory beanFactory, Class<?> beanType) {
+    private static boolean hasBeanInFactory(BeanFactory beanFactory, Class<?> beanType) {
         try {
             beanFactory.getBean(beanType);
             return true;
         } catch (BeansException e) {
             return false;
         }
-    }
-
-    public int filterOrder() {
-        return filterOrder;
-    }
-
-    public String filterName() {
-        return filterName;
     }
 
     public String message() {
@@ -83,7 +72,7 @@ public class ShutDownInfo {
         return status;
     }
 
-    public String produce() {
-        return produce;
+    public String contentType() {
+        return contentType;
     }
 }

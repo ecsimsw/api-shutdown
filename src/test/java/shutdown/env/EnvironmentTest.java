@@ -39,7 +39,7 @@ public class EnvironmentTest {
         assertThat(beanInCorePackage).isNotNull();
     }
 
-    @DisplayName("Test context 는 test 의 case 패키지마다 격리되어야 한다.")
+    @DisplayName("Test context 는 패키지마다 격리되어야 한다.")
     @Test
     public void checkTestCasePackageIsolated() {
         assertThatThrownBy(
