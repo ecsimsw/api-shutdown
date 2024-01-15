@@ -2,6 +2,8 @@
 
 API는 정의되었지만 더 이상 사용되지 않거나 임시로 막아둔 API 의 응답을 자동으로 생성한다.    
 
+latest version : 0.0.1
+
 ## 기능들 
 - 조건을 만족하면 정의된 핸들러의 HttpMethod 와 RequestPath 에 맞춰 ShutDown 응답을 반환한다.
 - 조건은 Profile 정보, Property 존재 여부, 빈 존재 여부로 정의한다.
@@ -47,8 +49,20 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.ecsimsw:simple-auth:2.0.4'
+    implementation 'com.github.ecsimsw:utils-shutdown:0.0.1'
+
+    // implementation 'com.github.ecsimsw:utils-shutdown:{LATEST-VERSION}'
 }
+```
+
+### @EnableShutDown 추가
+
+@EnableShutDown 로 라이브러리 사용을 활성화한다. @SpringBootApplication 같은 애플리케이션 진입점 또는 @Configuration 파일에 적용한다.
+
+``` java
+@EnableShutDown
+@SpringBootApplication
+public class MyApplication {}
 ```
 
 ### ShutDown 정의 
