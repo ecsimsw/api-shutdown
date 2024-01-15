@@ -22,7 +22,9 @@ public @interface ShutDown {
     // Response http status of shut down api
     HttpStatus status() default HttpStatus.SERVICE_UNAVAILABLE;
 
+    // Response content type
     String contentType() default MediaType.APPLICATION_JSON_VALUE;
 
+    // For shutdown, while ignoring other conditions
     boolean force() default false;
 }

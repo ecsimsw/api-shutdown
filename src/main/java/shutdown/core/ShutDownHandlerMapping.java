@@ -13,7 +13,7 @@ import java.util.Set;
 public class ShutDownHandlerMapping {
 
     private static final Set<Class<? extends Annotation>> SUPPORTED_HTTP_METHODS = Set.of(
-        GetMapping.class, PutMapping.class, DeleteMapping.class, PatchMapping.class
+        GetMapping.class, PutMapping.class, DeleteMapping.class, PatchMapping.class, RequestMapping.class
     );
 
     private final List<HttpMethod> methods;
@@ -39,31 +39,38 @@ public class ShutDownHandlerMapping {
 
     public static ShutDownHandlerMapping from(Method method) {
         if (method.isAnnotationPresent(GetMapping.class)) {
-            var apiPaths = method.getAnnotation(GetMapping.class).value();
-            return new ShutDownHandlerMapping(HttpMethod.GET, apiPaths);
+            return new ShutDownHandlerMapping(
+                HttpMethod.GET,
+                method.getAnnotation(GetMapping.class).value()
+            );
         }
 
         if (method.isAnnotationPresent(PutMapping.class)) {
-            var apiPaths = method.getAnnotation(PutMapping.class).value();
-            return new ShutDownHandlerMapping(HttpMethod.PUT, apiPaths);
+            return new ShutDownHandlerMapping(
+                HttpMethod.PUT,
+                method.getAnnotation(PutMapping.class).value()
+            );
         }
 
         if (method.isAnnotationPresent(DeleteMapping.class)) {
-            var apiPaths = method.getAnnotation(DeleteMapping.class).value();
-            return new ShutDownHandlerMapping(HttpMethod.DELETE, apiPaths);
+            return new ShutDownHandlerMapping(
+                HttpMethod.DELETE,
+                method.getAnnotation(DeleteMapping.class).value()
+            );
         }
 
         if (method.isAnnotationPresent(PatchMapping.class)) {
-            var apiPaths = method.getAnnotation(PatchMapping.class).value();
-            return new ShutDownHandlerMapping(HttpMethod.PATCH, apiPaths);
+            return new ShutDownHandlerMapping(
+                HttpMethod.PATCH,
+                method.getAnnotation(PatchMapping.class).value()
+            );
         }
 
         if (method.isAnnotationPresent(RequestMapping.class)) {
-            var apiPaths = method.getAnnotation(RequestMapping.class).value();
             var methods = Arrays.stream(method.getAnnotation(RequestMapping.class).method())
                 .map(it -> HttpMethod.valueOf(it.name()))
                 .toArray(HttpMethod[]::new);
-            return new ShutDownHandlerMapping(methods, apiPaths);
+            return new ShutDownHandlerMapping(methods, method.getAnnotation(RequestMapping.class).value());
         }
         throw new ShutDownException("Not a valid handler method");
     }
