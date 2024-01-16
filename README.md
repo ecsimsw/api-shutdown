@@ -34,7 +34,7 @@ class ShutDownController {
 }
 ```
 
-Active profile 이 backup 인 상황에서 GET::/api/a 또는 POST::/api/b 요청시 정의된 shutDown 상태를 응답한다.                      
+Active profile 이 backup 인 상황에서 핸들러에 정의된 API 요청시 정의된 shutDown 상태를 응답한다.                      
 ```
 HTTP status : 503, SERVICE_UNAVAILABLE
 Content type : application/json
