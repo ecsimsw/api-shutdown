@@ -45,7 +45,8 @@ Message : This API is currently unavailable.
 
 ### build.gradle 
 
-라이브러리 의존성을 추가한다.
+라이브러리 의존성을 추가한다.     
+javax 를 사용하는 JDK 16 이하에선 javax-X.X.X 를 사용한다.
 ```
 repositories {
     maven { url 'https://jitpack.io' }
@@ -53,8 +54,6 @@ repositories {
 
 dependencies {
     implementation 'com.github.ecsimsw:api-shutdown:0.0.4'
-
-    // implementation 'com.github.ecsimsw:api-shutdown:{LATEST-VERSION}'  
     // implementation 'com.github.ecsimsw:api-shutdown:javax-0.0.4'       // for Versions lower than java17
 }
 ```
@@ -135,22 +134,6 @@ public class ShutDownConfig {
 }
 ```
 
-예를 들어 위처럼 전역 설정을 등록한다면 Message 는 "Local config message", @ShutDown 으로 정의되지 않은 Status, Content는 전역 설정을 따라 HttpStatus.TEMPORARY_REDIRECT, MediaType.APPLICATION_JSON_VALUE 으로 응답된다.
-
-``` java
-@ShutDown(
-  conditionOnBean = {TestApplication.class, SharedConfigurationReference.class},
-  message = "Local config message"
-)
-@RestController
-class ShutDownController {
-    @PostMapping("/echo")
-    public ResponseEntity<String> hey() {
-        return ResponseEntity.ok("Hey");
-    }
-}
-```
-
 ### 2. 설정 가능한 ShutDown 조건들
 
 ShutDown 조건을 설정할 수 있다.    
@@ -205,7 +188,7 @@ public class ShutDownConfig {
 
 #### 1. @ShutDown 핸들러
 
-컨틀롤러만이 아닌 핸들러를 기준으로도 어노테이션이 동작할 수 있도록 한다.    
+컨트롤러만이 아닌 핸들러를 기준으로도 어노테이션이 동작할 수 있도록 한다.    
 
 ``` java
 @ShutDown(
