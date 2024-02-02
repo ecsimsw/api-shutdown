@@ -55,8 +55,14 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
 
     private boolean hasBeanInFactory(ConfigurableListableBeanFactory beanFactory, Class<?> beanType) {
         var beanNamesForType = beanFactory.getBeanNamesForType(beanType);
+        for(var s : beanNamesForType) {
+            LOGGER.info("beanNamesForType " + s);
+        }
+        boolean b = Arrays.stream(beanNamesForType)
+            .anyMatch(beanFactory::containsBean);
+        LOGGER.info("containsBean " + b);
         return Arrays.stream(beanNamesForType)
-                .anyMatch(beanFactory::containsBeanDefinition);
+            .anyMatch(it -> List.of(beanFactory.getBeanDefinitionNames()).contains(it));
     }
 
     private ShutDownGlobalConfig getGlobalConfiguration(BeanFactory beanFactory) {
