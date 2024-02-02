@@ -54,8 +54,7 @@ public class ShutDownConditions {
             return Arrays.stream(conditionOnBean).allMatch(hasBean);
         }
         if (conditionOnMissingBean.length != 0) {
-            LOGGER.info("hihih i " + conditionOnMissingBean.length);
-            return Arrays.stream(conditionOnMissingBean).noneMatch(hasBean);
+            return Arrays.stream(conditionOnMissingBean).noneMatch(i -> false);
         }
         throw new ShutDownException("You must select either conditionOnBean or conditionOnMissingBean. Or set force to true");
     }
