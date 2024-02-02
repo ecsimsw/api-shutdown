@@ -41,7 +41,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         }
     }
 
-    private boolean isShutDownCondition(ShutDownAnnotated annotated, BeanFactory beanFactory) {
+    private boolean isShutDownCondition(ShutDownAnnotated annotated, ConfigurableListableBeanFactory beanFactory) {
         return annotated.conditions().isCondition(
             profile -> List.of(environment.getActiveProfiles()).contains(profile),
             property -> environment.containsProperty(property),
@@ -53,8 +53,13 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         );
     }
 
-    private boolean hasBeanInFactory(BeanFactory beanFactory, Class<?> beanType) {
+    private boolean hasBeanInFactory(ConfigurableListableBeanFactory beanFactory, Class<?> beanType) {
         try {
+            Arrays.stream(beanFactory.getBeanDefinitionNames())
+                    .forEach(it -> LOGGER.info("bean def i " + it));
+            String[] beanNamesForType = beanFactory.getBeanNamesForType(beanType);
+            Arrays.stream(beanNamesForType)
+                    .forEach(it -> LOGGER.info("bean name" + it));
             beanFactory.getBean(beanType);
             return true;
         } catch (BeansException e) {
