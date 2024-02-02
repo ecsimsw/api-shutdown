@@ -35,8 +35,6 @@ public class ShutDownConditions {
         );
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShutDownConditions.class);
-
     public boolean isCondition(Predicate<String> hasProfile, Predicate<String> hasProperty, Predicate<Class<?>> hasBean) {
         if (force) {
             return true;
