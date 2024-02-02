@@ -1,5 +1,8 @@
 package shutdown.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.function.Predicate;
 
@@ -32,7 +35,12 @@ public class ShutDownConditions {
         );
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShutDownConditions.class);
+
     public boolean isCondition(Predicate<String> hasProfile, Predicate<String> hasProperty, Predicate<Class<?>> hasBean) {
+        Arrays.stream(conditionOnMissingBean)
+            .forEach(it -> LOGGER.info(it.getName()));
+
         if (force) {
             return true;
         }
@@ -46,7 +54,7 @@ public class ShutDownConditions {
             return Arrays.stream(conditionOnBean).allMatch(hasBean);
         }
         if (conditionOnMissingBean.length != 0) {
-            return Arrays.stream(conditionOnMissingBean).noneMatch(hasBean);
+            return true;
         }
         throw new ShutDownException("You must select either conditionOnBean or conditionOnMissingBean. Or set force to true");
     }

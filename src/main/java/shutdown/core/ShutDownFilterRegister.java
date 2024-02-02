@@ -27,9 +27,6 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         var globalConfig = getGlobalConfiguration(beanFactory);
 
-//        Arrays.stream(beanFactory.getBeanDefinitionNames())
-//            .forEach(it -> LOGGER.info(it));
-
         for (var controller : shutDownControllerTypes(beanFactory)) {
             var annotated = ShutDownAnnotated.of(controller);
             if(isShutDownCondition(annotated, beanFactory)) {
@@ -47,11 +44,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         return annotated.conditions().isCondition(
             profile -> List.of(environment.getActiveProfiles()).contains(profile),
             property -> environment.containsProperty(property),
-            beanType -> {
-                boolean b = hasBeanInFactory(beanFactory, beanType);
-                LOGGER.info(beanType.getName() + " has : " + b);
-                return b;
-            }
+            beanType -> hasBeanInFactory(beanFactory, beanType)
         );
     }
 
