@@ -39,7 +39,7 @@ public class ShutDownConditions {
 
     public boolean isCondition(Predicate<String> hasProfile, Predicate<String> hasProperty, Predicate<Class<?>> hasBean) {
         Arrays.stream(conditionOnMissingBean)
-            .forEach(it -> LOGGER.info(it.getName()));
+            .forEach(it -> LOGGER.info("hihih i " + it.getName()));
 
         if (force) {
             return true;

@@ -29,6 +29,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
 
         for (var controller : shutDownControllerTypes(beanFactory)) {
             var annotated = ShutDownAnnotated.of(controller);
+            LOGGER.info("hihiihihihi");
             if(isShutDownCondition(annotated, beanFactory)) {
                 var handlerMappings = ShutDownHandlerMappings.of(controller);
                 var shutDownFilter = ShutDownFilter.of(globalConfig, annotated);
