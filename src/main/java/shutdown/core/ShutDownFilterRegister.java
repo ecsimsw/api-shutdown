@@ -47,7 +47,11 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         return annotated.conditions().isCondition(
             profile -> List.of(environment.getActiveProfiles()).contains(profile),
             property -> environment.containsProperty(property),
-            beanType -> hasBeanInFactory(beanFactory, beanType)
+            beanType -> {
+                boolean b = hasBeanInFactory(beanFactory, beanType);
+                LOGGER.info(beanType.getName() + " has : " + b);
+                return b;
+            }
         );
     }
 
