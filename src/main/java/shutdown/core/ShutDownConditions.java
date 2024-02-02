@@ -40,7 +40,7 @@ public class ShutDownConditions {
     public boolean isCondition(Predicate<String> hasProfile, Predicate<String> hasProperty, Predicate<Class<?>> hasBean) {
         Arrays.stream(conditionOnMissingBean)
             .forEach(it -> LOGGER.info("hihih i " + it.getName()));
-
+        LOGGER.info("hihih i " + conditionOnMissingBean.length);
         if (force) {
             return true;
         }
@@ -54,7 +54,8 @@ public class ShutDownConditions {
             return Arrays.stream(conditionOnBean).allMatch(hasBean);
         }
         if (conditionOnMissingBean.length != 0) {
-            return true;
+            LOGGER.info("hihih i " + conditionOnMissingBean.length);
+            return Arrays.stream(conditionOnMissingBean).noneMatch(hasBean);
         }
         throw new ShutDownException("You must select either conditionOnBean or conditionOnMissingBean. Or set force to true");
     }
