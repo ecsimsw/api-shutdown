@@ -2,7 +2,7 @@
 
 API는 정의되었지만 더 이상 사용되지 않거나 임시로 막아둔 API 의 응답을 자동으로 생성한다.    
 
-latest version : 0.0.4
+latest version : 0.0.5
 
 ## 기능들 
 - 조건을 만족하면 정의된 핸들러의 HttpMethod 와 RequestPath 에 맞춰 ShutDown 응답을 반환한다.
@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.ecsimsw:api-shutdown:0.0.4'
-    // implementation 'com.github.ecsimsw:api-shutdown:javax-0.0.4'       // for Versions lower than java17
+    implementation 'com.github.ecsimsw:api-shutdown:0.0.5'
+    // implementation 'com.github.ecsimsw:api-shutdown:javax-0.0.5'       // for Versions lower than java17
 }
 ```
 
