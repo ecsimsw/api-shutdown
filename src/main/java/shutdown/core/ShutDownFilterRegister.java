@@ -10,6 +10,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         }
     }
 
-    private boolean isShutDownCondition(ShutDownAnnotated annotated, BeanFactory beanFactory) {
+    private boolean isShutDownCondition(ShutDownAnnotated annotated, ConfigurableListableBeanFactory beanFactory) {
         return annotated.conditions().isCondition(
             profile -> List.of(environment.getActiveProfiles()).contains(profile),
             property -> environment.containsProperty(property),
@@ -42,13 +43,11 @@ public class ShutDownFilterRegister implements BeanFactoryPostProcessor, Environ
         );
     }
 
-    private boolean hasBeanInFactory(BeanFactory beanFactory, Class<?> beanType) {
-        try {
-            beanFactory.getBean(beanType);
-            return true;
-        } catch (BeansException e) {
-            return false;
-        }
+    // XXX :: beanFactory.getBean is not working at other packages. Failed to get bean class file.
+    private boolean hasBeanInFactory(ConfigurableListableBeanFactory beanFactory, Class<?> beanType) {
+        var beanNamesForType = beanFactory.getBeanNamesForType(beanType);
+        return Arrays.stream(beanNamesForType)
+            .anyMatch(beanFactory::containsBean);
     }
 
     private ShutDownGlobalConfig getGlobalConfiguration(BeanFactory beanFactory) {
